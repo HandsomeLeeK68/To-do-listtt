@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'http://localhost:5001/api/todos';
+const API_URL = 'https://my-to-do-listtt.onrender.com';
 
 function App() {
   const [input, setInput] = useState('');
