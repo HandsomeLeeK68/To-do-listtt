@@ -7,7 +7,7 @@ import {
   useNavigate,
 } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5001/api/todos';
+const API_URL = 'https://my-to-do-listtt.onrender.com/api/todos';
 
 // --- Protected Route ---
 function ProtectedRoute({ children }) {
@@ -37,7 +37,7 @@ function Login() {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch('http://localhost:5001/login', {
+      const res = await fetch('https://my-to-do-listtt.onrender.com/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -126,7 +126,7 @@ function Register() {
     setError('');
     setSuccess('');
     try {
-      const res = await fetch('http://localhost:5001/register', {
+      const res = await fetch('https://my-to-do-listtt.onrender.com/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
