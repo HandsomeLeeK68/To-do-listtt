@@ -3,7 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 
 const app = express();
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
 
 // MongoDB connection
 const mongoURI = 'mongodb+srv://handsomelee:handsomelee@cluster0.ky8lcx0.mongodb.net/?appName=Cluster0';
