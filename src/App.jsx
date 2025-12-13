@@ -15,6 +15,17 @@ function ProtectedRoute({ children }) {
   return token ? children : <Navigate to="/login" replace />;
 }
 
+// Priority utilities
+const PRIORITY_OPTIONS = [
+  { label: "High", value: "High", color: "bg-red-500 text-white" },
+  { label: "Medium", value: "Medium", color: "bg-yellow-400 text-gray-900" },
+  { label: "Low", value: "Low", color: "bg-green-500 text-white" },
+];
+function getPriorityColor(priority) {
+  const found = PRIORITY_OPTIONS.find(opt => opt.value === priority);
+  return found ? found.color : "bg-gray-300 text-gray-600";
+}
+
 // --- Login Component ---
 function Login() {
   const [username, setUsername] = useState('');
@@ -193,11 +204,15 @@ function Register() {
   );
 }
 
-// --- Main Todos Page ---
+// --- Main Todos Page with Priority & Edit ---
 function TodoAppMain() {
   const [input, setInput] = useState('');
+  const [inputPriority, setInputPriority] = useState('Medium');
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState('');
+  const [editPriority, setEditPriority] = useState('Medium');
   const navigate = useNavigate();
 
   const token = localStorage.getItem('token');
@@ -236,6 +251,13 @@ function TodoAppMain() {
     // eslint-disable-next-line
   }, [token]);
 
+  // Compose tasks sorted by priority
+  const sortedTasks = [...tasks].sort((a, b) => {
+    const order = { 'High': 0, 'Medium': 1, 'Low': 2 };
+    return order[a.priority || 'Medium'] - order[b.priority || 'Medium'];
+  });
+
+  // Add Task
   const handleAddTask = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -246,12 +268,13 @@ function TodoAppMain() {
           'Content-Type': 'application/json',
           Authorization: 'Bearer ' + token,
         },
-        body: JSON.stringify({ text: trimmed }),
+        body: JSON.stringify({ text: trimmed, priority: inputPriority }),
       });
       if (res.ok) {
         const newTask = await res.json();
         setTasks(prev => [...prev, newTask]);
         setInput('');
+        setInputPriority('Medium');
       } else if (res.status === 401 || res.status === 403) {
         handleLogout();
       }
@@ -260,6 +283,7 @@ function TodoAppMain() {
     }
   };
 
+  // Delete Task
   const handleDeleteTask = async (_id) => {
     try {
       const res = await fetch(`${API_URL}/${_id}`, {
@@ -278,13 +302,23 @@ function TodoAppMain() {
     }
   };
 
+  // Toggle Complete
   const handleToggleCompleted = async (_id) => {
+    const task = tasks.find(t => t._id === _id);
+    if (!task) return;
     try {
+      // Include all fields to support updating priority later if desired
       const res = await fetch(`${API_URL}/${_id}`, {
         method: 'PUT',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: 'Bearer ' + token,
         },
+        body: JSON.stringify({
+          completed: !task.completed,
+          text: task.text,
+          priority: task.priority
+        }),
       });
       if (res.ok) {
         const updated = await res.json();
@@ -296,9 +330,57 @@ function TodoAppMain() {
       } else if (res.status === 401 || res.status === 403) {
         handleLogout();
       }
-    } catch (e) {
-      // handle error
-    }
+    } catch (e) {}
+  };
+
+  // Start editing (text & priority)
+  const startEditTask = task => {
+    setEditingId(task._id);
+    setEditValue(task.text);
+    setEditPriority(task.priority || "Medium");
+  };
+
+  // Cancel editing
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditValue('');
+    setEditPriority('Medium');
+  };
+
+  // Save edit (update text and optionally priority)
+  const handleSaveEdit = async (_id) => {
+    const trimmed = editValue.trim();
+    if (!trimmed) return;
+    try {
+      const original = tasks.find(task => task._id === _id);
+      const res = await fetch(`${API_URL}/${_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token,
+        },
+        body: JSON.stringify({
+          text: trimmed,
+          priority: editPriority,
+          completed: original.completed,
+        }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setTasks(tasks =>
+          tasks.map(task =>
+            task._id === _id
+              ? { ...task, text: updated.text, priority: updated.priority }
+              : task
+          )
+        );
+        setEditingId(null);
+        setEditValue('');
+        setEditPriority('Medium');
+      } else if (res.status === 401 || res.status === 403) {
+        handleLogout();
+      }
+    } catch (e) {}
   };
 
   return (
@@ -322,6 +404,16 @@ function TodoAppMain() {
             className="flex-1 px-4 py-2 rounded-lg border border-gray-300 shadow focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white transition"
             onKeyDown={e => { if (e.key === 'Enter') handleAddTask(); }}
           />
+          <select
+            value={inputPriority}
+            onChange={e => setInputPriority(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-gray-300 shadow focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-sm transition"
+            aria-label="Choose priority"
+          >
+            {PRIORITY_OPTIONS.map(opt =>
+              <option value={opt.value} key={opt.value}>{opt.label}</option>
+            )}
+          </select>
           <button
             onClick={handleAddTask}
             className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-400 text-white px-5 py-2 rounded-lg font-semibold shadow hover:from-purple-600 hover:to-red-500 transition"
@@ -330,10 +422,10 @@ function TodoAppMain() {
           </button>
         </div>
         <ul className="space-y-3">
-          {tasks.map((task) => (
+          {sortedTasks.map((task) => (
             <li
               key={task._id}
-              className="flex items-center bg-white/80 rounded-lg px-4 py-2 shadow group transition"
+              className={`flex items-center bg-white/80 rounded-lg px-4 py-2 shadow group transition`}
             >
               <input
                 type="checkbox"
@@ -341,22 +433,77 @@ function TodoAppMain() {
                 onChange={() => handleToggleCompleted(task._id)}
                 className="accent-purple-500 w-5 h-5 mr-3"
               />
-              <span
-                className={`flex-1 text-lg ${
-                  task.completed
-                    ? 'line-through text-gray-400'
-                    : 'text-gray-800'
-                }`}
-              >
-                {task.text}
+              {/* Priority Badge */}
+              <span className={`text-xs font-semibold px-2 py-1 rounded-full mr-3 ${getPriorityColor(task.priority)}`}>
+                {task.priority || 'Medium'}
               </span>
-              <button
-                onClick={() => handleDeleteTask(task._id)}
-                className="ml-4 bg-gradient-to-r from-rose-500 to-red-400 text-white px-3 py-1 rounded-full shadow hover:from-rose-600 hover:to-red-500 transition opacity-80 hover:opacity-100"
-                aria-label="Delete"
-              >
-                Delete
-              </button>
+              {/* Editable text/priority or display */}
+              {editingId === task._id ? (
+                <>
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={e => setEditValue(e.target.value)}
+                    className="flex-1 text-lg border border-gray-300 rounded-md px-2 py-1 mr-2 focus:ring-2 focus:ring-purple-400"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') handleSaveEdit(task._id);
+                      if (e.key === 'Escape') cancelEdit();
+                    }}
+                    autoFocus
+                  />
+                  <select
+                    value={editPriority}
+                    onChange={e => setEditPriority(e.target.value)}
+                    className="mr-2 px-2 py-1 rounded-lg border border-gray-300 text-sm"
+                  >
+                    {PRIORITY_OPTIONS.map(opt =>
+                      <option value={opt.value} key={opt.value}>{opt.label}</option>
+                    )}
+                  </select>
+                  <button
+                    onClick={() => handleSaveEdit(task._id)}
+                    className="bg-green-500 text-white px-3 py-1 rounded shadow mr-1 hover:bg-green-600 font-semibold"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    className="bg-gray-300 text-gray-600 px-2 py-1 rounded shadow hover:bg-gray-400 ml-1"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span
+                    className={`flex-1 text-lg ${
+                      task.completed
+                        ? 'line-through text-gray-400'
+                        : 'text-gray-800'
+                    }`}
+                  >
+                    {task.text}
+                  </span>
+                  <button
+                    onClick={() => startEditTask(task)}
+                    className="ml-2 p-1 rounded-full hover:bg-purple-100 transition"
+                    aria-label="Edit"
+                    title="Edit"
+                  >
+                    {/* Pencil icon */}
+                    <svg height="18" width="18" viewBox="0 0 20 20" fill="none" className="inline align-middle">
+                      <path d="M14.85 2.85a1.207 1.207 0 0 1 1.7 1.7l-1 1-1.7-1.7 1-1zM3 13.75l8.73-8.73 1.7 1.7L4.7 15.4H3v-1.65z" fill="#9333ea" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTask(task._id)}
+                    className="ml-2 bg-gradient-to-r from-rose-500 to-red-400 text-white px-3 py-1 rounded-full shadow hover:from-rose-600 hover:to-red-500 transition opacity-80 hover:opacity-100"
+                    aria-label="Delete"
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
             </li>
           ))}
         </ul>

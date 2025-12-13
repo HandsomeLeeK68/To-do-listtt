@@ -27,6 +27,11 @@ const todoSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   text: { type: String, required: true },
   completed: { type: Boolean, required: true, default: false },
+  priority: { 
+    type: String, 
+    enum: ['High', 'Medium', 'Low'], 
+    default: 'Medium' 
+  },
 });
 const Todo = mongoose.model('Todo', todoSchema);
 
@@ -108,16 +113,22 @@ app.get('/api/todos', authenticateToken, async (req, res) => {
   }
 });
 
-// POST: Add a new task for current user
+// POST: Add a new task for current user (now supports priority)
 app.post('/api/todos', authenticateToken, async (req, res) => {
   try {
-    const { text, completed } = req.body;
+    const { text, completed, priority } = req.body;
     if (!text) return res.status(400).json({ error: 'Text required' });
+
+    let todoPriority = priority;
+    if (!['High', 'Medium', 'Low'].includes(todoPriority)) {
+      todoPriority = 'Medium'; // fallback to default
+    }
 
     const todo = new Todo({
       userId: req.user.userId,
       text,
       completed: completed ?? false,
+      priority: todoPriority
     });
     const savedTodo = await todo.save();
     res.json(savedTodo);
@@ -143,17 +154,38 @@ app.delete('/api/todos/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// PUT: Toggle completed status for current user's todo
+// PUT: Edit a todo (update text, priority, or completed) for current user's todo
 app.put('/api/todos/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
+    const { text, completed, priority } = req.body;
     // Find todo and ensure ownership
     const todo = await Todo.findOne({ _id: id, userId: req.user.userId });
     if (!todo) {
       return res.status(404).json({ error: 'Todo not found or not yours' });
     }
 
-    todo.completed = !todo.completed;
+    // Only update fields provided in req.body
+
+    if (typeof text === 'string') {
+      todo.text = text;
+    }
+    if (typeof completed === 'boolean') {
+      todo.completed = completed;
+    }
+    if (typeof priority === 'string' && ['High', 'Medium', 'Low'].includes(priority)) {
+      todo.priority = priority;
+    }
+
+    // If no fields are provided, fallback to toggling completed (for backward compat.)
+    if (
+      text === undefined &&
+      completed === undefined &&
+      priority === undefined
+    ) {
+      todo.completed = !todo.completed;
+    }
+
     const updated = await todo.save();
     res.json(updated);
   } catch (err) {
