@@ -1131,7 +1131,7 @@ function TodoAppMain() {
       {/* Main Content Area */}
       <main
         className="
-          flex-1 flex flex-col h-full overflow-hidden
+          flex-1 w-full flex flex-col h-full overflow-hidden
           bg-white/50 backdrop-blur-xl
           shadow-2xl
           rounded-l-3xl md:rounded-l-none
@@ -1140,7 +1140,6 @@ function TodoAppMain() {
           ml-0 md:ml-0
           "
         style={{
-          marginLeft: 'calc(min(60vw, 340px))', // hide beneath md breakpoint, slide out over main
           minWidth: 0,
         }}
       >
