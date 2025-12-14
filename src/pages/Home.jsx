@@ -200,11 +200,17 @@ export default function Home() {
       {/* Overlay effects */}
       {pct === 100 && tasks.length > 0 && <Confetti width={width} height={height} numberOfPieces={700} gravity={0.22} recycle={false} style={{ zIndex: 40 }} />}
       <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-        {showCelebration && (
-          <span className="text-white font-extrabold text-6xl drop-shadow-xl animate-bounce">
-            Congratulations! 🎉
+        
+      {showCelebration && (
+        <div className="font-extrabold text-6xl drop-shadow-2xl animate-bounce flex items-center gap-3">
+          {/* Chỉ áp dụng màu gradient cho chữ */}
+          <span className="bg-gradient-to-r from-orange-400 via-yellow-300 to-red-500 bg-clip-text text-transparent">
+            Congratulations!
           </span>
-        )}
+          {/* Icon giữ nguyên màu gốc */}
+          <span>🎉</span>
+        </div>
+      )}
       </div>
 
       <ProfileModal
