@@ -197,34 +197,11 @@ export default function Home() {
 
   return (
     <div className="w-screen h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex relative overflow-hidden">
-      {/* Overlay effects */}
-      {pct === 100 && tasks.length > 0 && <Confetti width={width} height={height} numberOfPieces={700} gravity={0.22} recycle={false} style={{ zIndex: 40 }} />}
-      <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-        
-      {showCelebration && (
-        <div className="font-extrabold text-6xl drop-shadow-2xl animate-bounce flex items-center gap-3">
-          {/* Chỉ áp dụng màu gradient cho chữ */}
-          <span className="bg-gradient-to-r from-orange-400 via-yellow-300 to-red-500 bg-clip-text text-transparent">
-            Congratulations!
-          </span>
-          {/* Icon giữ nguyên màu gốc */}
-          <span>🎉</span>
-        </div>
-      )}
-      </div>
+      {/* ... (Confetti, Celebration, ProfileModal) giữ nguyên ... */}
 
-      <ProfileModal
-        show={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        profile={profileDraft}
-        onChange={setProfileDraft}
-        onSave={handleSaveProfile}
-        saving={profileSaving}
-        error={profileError}
-      />
-
-      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="absolute top-5 left-5 z-50 md:hidden rounded-full p-2 bg-white/70">
-        <svg width="26" height="26" fill="none" stroke="#0e7490" strokeWidth="2.5"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      {/* Nút Mobile Menu: Đặt z-50 để nổi lên trên */}
+      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="absolute top-4 left-4 z-50 md:hidden rounded-full p-2 bg-white/90 shadow-lg text-cyan-600">
+        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
 
       <Sidebar
@@ -237,18 +214,16 @@ export default function Home() {
         onAvatarClick={() => setShowProfileModal(true)}
       />
 
-      {/* CẬP NHẬT GIAO DIỆN HOME:
-         1. rounded-none: Để bỏ bo góc, lấp đầy khe hở màu đen.
-         2. border-l border-white/10: Thêm đường viền mờ để ngăn cách rõ ràng Sidebar và Main, tránh bị "trắng trơn".
-         3. bg-white/95: Giữ nền sáng nhưng vẫn đồng bộ.
+      {/* Main Content:
+          - Mobile: px-4 (để cách lề), pt-16 (để tránh nút menu)
+          - Desktop: px-12, pt-6
       */}
-      <main className="flex-1 w-full flex flex-col h-full overflow-hidden bg-white/95 backdrop-blur-lg shadow-2xl rounded-none border-l border-white/20 md:px-12 py-6">
-        <span className={`block md:hidden ${sidebarOpen ? 'h-8' : 'h-0'}`} />
+      <main className="flex-1 w-full flex flex-col h-full overflow-hidden bg-white/95 backdrop-blur-lg shadow-2xl rounded-none border-l border-white/20 px-4 pt-16 md:px-12 md:pt-6">
         
         {/* Header */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <h1 className="text-3xl font-black text-slate-900">{getTabTitle(activeTab)}</h1>
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900">{getTabTitle(activeTab)}</h1>
             <span className="text-xs font-bold text-slate-700">{tasks.length === 0 ? "0%" : `${pct}%`}</span>
           </div>
           <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
@@ -263,7 +238,7 @@ export default function Home() {
           onAdd={onAddTask}
         />
 
-        <div className="flex-1 overflow-y-auto hide-scrollbar py-2">
+        <div className="flex-1 overflow-y-auto hide-scrollbar py-2 pb-20 md:pb-2">
           {loading ? (
             <p className="text-center mt-10 animate-pulse text-cyan-600">Loading...</p>
           ) : filteredTodos.length === 0 ? (

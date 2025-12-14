@@ -44,15 +44,15 @@ export default function Login() {
   ];
 
   return (
-    <div className="flex min-h-screen w-full">
-      {/* Nửa bên trái: Giới thiệu */}
-      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex-col justify-center items-center text-white p-12 relative overflow-hidden">
-        {/* Decorative circles */}
+    // THAY ĐỔI: Thêm bg-gradient cho container cha để Mobile cũng có nền đẹp
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      
+      {/* Nửa bên trái: Giới thiệu (Ẩn trên mobile, Hiện trên Desktop) */}
+      <div className="hidden md:flex w-1/2 flex-col justify-center items-center text-white p-12 relative overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl"></div>
 
         <div className="z-10 flex flex-col items-center text-center space-y-8 max-w-lg">
-          {/* Logo & Tên Web */}
           <div className="flex flex-col items-center">
             <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/20 shadow-xl mb-4">
               <ListTodo size={64} className="text-cyan-400" />
@@ -65,7 +65,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Các chức năng chính với Icon xịn */}
           <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10 w-full shadow-lg">
             <h3 className="text-xl font-bold mb-4 text-left border-b border-white/10 pb-2">Main Features</h3>
             <ul className="space-y-4 text-left">
@@ -80,7 +79,6 @@ export default function Login() {
             </ul>
           </div>
 
-          {/* Footer Info */}
           <div className="mt-auto pt-8 opacity-80">
             <p className="text-sm font-light tracking-wider uppercase text-slate-400">Developed by</p>
             <p className="text-lg font-bold text-white mt-1">Lê Nghĩa Hiệp</p>
@@ -88,15 +86,16 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Nửa bên phải: Form Login (Cải tiến nền) */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-[#f8fafc] relative">
-        {/* Họa tiết nền mờ */}
-        <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px] opacity-50"></div>
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-50/50 via-transparent to-purple-50/50"></div>
-
+      {/* Nửa bên phải: Form Login */}
+      {/* THAY ĐỔI: Trên mobile background trong suốt để lộ gradient cha, trên desktop mới dùng bg-[#f8fafc] */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-4 md:p-8 md:bg-[#f8fafc] relative">
+        
+        {/* Họa tiết nền chỉ hiện trên Desktop */}
+        <div className="hidden md:block absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px] opacity-50"></div>
+        
         <form
           onSubmit={handleSubmit}
-          className="relative bg-white/80 border border-white shadow-2xl rounded-3xl p-10 w-full max-w-md transition-all duration-300 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] backdrop-blur-xl"
+          className="relative bg-white/90 md:bg-white/80 border border-white shadow-2xl rounded-3xl p-6 md:p-10 w-full max-w-md transition-all duration-300 backdrop-blur-xl"
         >
           <div className="text-center mb-8">
             <div className="inline-block p-3 rounded-full bg-blue-50 text-blue-600 mb-4">
@@ -108,8 +107,7 @@ export default function Login() {
 
           {error && (
             <div className="bg-red-50 text-red-500 text-sm py-3 px-4 rounded-xl mb-6 border border-red-100 font-medium text-center flex items-center justify-center gap-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              {error}
+              ⚠️ {error}
             </div>
           )}
 

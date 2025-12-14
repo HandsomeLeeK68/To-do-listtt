@@ -46,10 +46,11 @@ export default function Register() {
   ];
 
   return (
-    <div className="flex min-h-screen w-full">
-      {/* Nửa bên trái: Giới thiệu (Giống hệt Login) */}
-      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex-col justify-center items-center text-white p-12 relative overflow-hidden">
-        {/* Decorative circles */}
+    // THAY ĐỔI: Thêm gradient cho container cha
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      
+      {/* Nửa trái: Giới thiệu (Ẩn trên mobile) */}
+      <div className="hidden md:flex w-1/2 flex-col justify-center items-center text-white p-12 relative overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl"></div>
 
@@ -62,7 +63,7 @@ export default function Register() {
               My Todo App
             </h1>
             <p className="text-blue-200 mt-2 text-lg font-medium">
-              Manage your tasks efficiently and elegantly.
+              Join us and start organizing your life today.
             </p>
           </div>
 
@@ -87,14 +88,14 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Nửa bên phải: Form Register */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-[#f8fafc] relative">
-        <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px] opacity-50"></div>
-        <div className="absolute inset-0 bg-gradient-to-tr from-purple-50/50 via-transparent to-blue-50/50"></div>
-
+      {/* Nửa phải: Form Register */}
+      {/* THAY ĐỔI: Bg trong suốt trên mobile */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-4 md:p-8 md:bg-[#f8fafc] relative">
+        <div className="hidden md:block absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:20px_20px] opacity-50"></div>
+        
         <form
           onSubmit={handleSubmit}
-          className="relative bg-white/80 border border-white shadow-2xl rounded-3xl p-10 w-full max-w-md transition-all duration-300 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] backdrop-blur-xl"
+          className="relative bg-white/90 md:bg-white/80 border border-white shadow-2xl rounded-3xl p-6 md:p-10 w-full max-w-md transition-all duration-300 backdrop-blur-xl"
         >
           <div className="text-center mb-8">
             <div className="inline-block p-3 rounded-full bg-cyan-50 text-cyan-600 mb-4">
