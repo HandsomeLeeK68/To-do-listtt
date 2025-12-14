@@ -34,18 +34,20 @@ const SIDEBAR_NAV = [
   { key: 'IMPORTANT', label: 'Important', icon: <svg width={20} height={20} fill="none" viewBox="0 0 20 20"><path d="M10 2l2.09 6.26L18 9.27l-5 4.73L14.18 18 10 15.27 5.82 18 7 14l-5-4.73 5.91-.91L10 2z" fill="#ef4444"/></svg> }
 ];
 
+// Updated PRIORITY_OPTIONS for high-contrast, subtle style
 const PRIORITY_OPTIONS = [
-  { label: "High", value: "High", color: "bg-red-500 text-white" },
-  { label: "Medium", value: "Medium", color: "bg-yellow-400 text-gray-900" },
-  { label: "Low", value: "Low", color: "bg-green-500 text-white" },
+  { label: "High", value: "High", color: "bg-red-100 text-red-700 border border-red-200" },
+  { label: "Medium", value: "Medium", color: "bg-amber-100 text-amber-700 border border-amber-200" },
+  { label: "Low", value: "Low", color: "bg-emerald-100 text-emerald-700 border border-emerald-200" },
 ];
 
 function getPriorityColor(priority) {
+  // Used for badge classes
   const found = PRIORITY_OPTIONS.find(opt => opt.value === priority);
-  return found ? found.color : "bg-gray-300 text-gray-600";
+  return found ? found.color : "bg-slate-100 text-slate-600 border border-slate-200";
 }
 
-// New helper for border color by priority (case-insensitive, null safe)
+// Border helpers remain unchanged (can be tweaked for subtlety if desired)
 const getPriorityBorderColor = (priority) => {
   const p = priority ? priority.toLowerCase() : 'medium';
   if (p === 'high') return 'border-red-500 shadow-[0_0_0_1px_rgba(239,68,68,0.2)]';
@@ -53,7 +55,6 @@ const getPriorityBorderColor = (priority) => {
   return 'border-yellow-400 shadow-[0_0_0_1px_rgba(250,204,21,0.2)]'; // Default Medium
 };
 
-// --- NEW: Robust border helper for mutually exclusive borders ---
 const getPriorityBorder = (priority) => {
   const p = (priority || 'Medium').toLowerCase().trim();
   if (p === 'high') return 'border-red-500 ring-1 ring-red-500/50';
@@ -66,7 +67,6 @@ const getPriorityBorder = (priority) => {
 function getNowDatetimeLocal() {
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
-  // Local time, pad
   const yyyy = now.getFullYear();
   const mm = pad(now.getMonth() + 1);
   const dd = pad(now.getDate());
@@ -89,7 +89,6 @@ function formatDueDate(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return null;
-
   let datePart = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   let hours = d.getHours();
   let mins = d.getMinutes();
@@ -100,12 +99,10 @@ function formatDueDate(dateStr) {
   }
 }
 
-// Helper to format ISO birthdate to nice string
 function formatBirthday(birthday) {
   if (!birthday) return null;
   const d = new Date(birthday);
   if (isNaN(d.getTime())) return null;
-  // e.g. "Jan 20, 1990"
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
@@ -181,7 +178,7 @@ function ProfileModal({ show, onClose, profile, onChange, onSave, saving, error 
         >
           ×
         </button>
-        <h2 className="text-2xl font-bold text-cyan-900 text-center mb-5">User Profile</h2>
+        <h2 className="text-2xl font-bold text-slate-900 text-center mb-5">User Profile</h2>
         <form
           onSubmit={e => {
             onSave(e);
@@ -202,7 +199,7 @@ function ProfileModal({ show, onClose, profile, onChange, onSave, saving, error 
             }
           </div>
           <div className="mb-3">
-            <label className="block text-cyan-800 font-semibold mb-1">Display Name</label>
+            <label className="block text-slate-700 font-semibold mb-1">Display Name</label>
             <input
               type="text"
               value={profile.displayName || ""}
@@ -213,7 +210,7 @@ function ProfileModal({ show, onClose, profile, onChange, onSave, saving, error 
             />
           </div>
           <div className="mb-3">
-            <label className="block text-cyan-800 font-semibold mb-1">Avatar URL</label>
+            <label className="block text-slate-700 font-semibold mb-1">Avatar URL</label>
             <input
               type="url"
               placeholder="Paste image link..."
@@ -228,7 +225,7 @@ function ProfileModal({ show, onClose, profile, onChange, onSave, saving, error 
             )}
           </div>
           <div className="mb-3">
-            <label className="block text-cyan-800 font-semibold mb-1">Birthday</label>
+            <label className="block text-slate-700 font-semibold mb-1">Birthday</label>
             <input
               type="date"
               value={profile.birthday ? profile.birthday.slice(0, 10) : ""}
@@ -237,7 +234,7 @@ function ProfileModal({ show, onClose, profile, onChange, onSave, saving, error 
             />
           </div>
           <div className="mb-4">
-            <label className="block text-cyan-800 font-semibold mb-1">Bio</label>
+            <label className="block text-slate-700 font-semibold mb-1">Bio</label>
             <textarea
               value={profile.bio || ""}
               onChange={e => onChange({ ...profile, bio: e.target.value })}
@@ -295,7 +292,7 @@ function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-cyan-500 to-blue-700">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <form
         onSubmit={handleSubmit}
         className="
@@ -393,7 +390,7 @@ function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-cyan-500 to-blue-700">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <form
         onSubmit={handleSubmit}
         className="
@@ -494,7 +491,7 @@ function Sidebar({
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0 md:block
           w-60 md:w-1/4
-          bg-white/30 backdrop-blur-xl border-r border-white/20 shadow-lg
+          bg-slate-50/80 backdrop-blur-2xl border-r border-white/20 shadow-lg
           px-6 pt-8 pb-6
           transition-transform duration-300
           flex flex-col
@@ -532,16 +529,16 @@ function Sidebar({
               <svg width={16} height={16} fill="none" viewBox="0 0 24 24"><circle cx={12} cy={12} r={10} stroke="#0891b2" strokeWidth="2"/><path d="M12 16v2m0-10.5V8m0 0a2 2 0 110-4 2 2 0 010 4z" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" /></svg>
             </span>
           </button>
-          <div className="text-xl font-semibold text-cyan-900 mb-1 text-center truncate max-w-[90%]">{displayName}</div>
+          <div className="text-xl font-semibold text-slate-900 mb-1 text-center truncate max-w-[90%]">{displayName}</div>
           {birthday && (
-            <div className="text-xs text-cyan-700 font-medium mb-1">🎂 {formatBirthday(birthday)}</div>
+            <div className="text-xs text-slate-700 font-medium mb-1">🎂 {formatBirthday(birthday)}</div>
           )}
           {bio && (
-            <div className="text-xs text-cyan-600/80 mb-1 text-center max-w-[94%] truncate">{bio}</div>
+            <div className="text-xs text-slate-700/80 mb-1 text-center max-w-[94%] truncate">{bio}</div>
           )}
           <button
             onClick={handleLogout}
-            className="mt-1 px-4 py-1 rounded-lg bg-white/40 text-red-500 border border-white/30 shadow hover:bg-red-500 hover:text-white transition font-semibold text-sm"
+            className="mt-1 px-4 py-1 rounded-lg bg-white/60 text-red-500 border border-white/30 shadow hover:bg-red-500 hover:text-white transition font-semibold text-sm"
           >
             Logout
           </button>
@@ -559,8 +556,8 @@ function Sidebar({
                 text-lg font-medium
                 transition 
                 ${activeTab === item.key
-                  ? "bg-cyan-500/95 text-white shadow font-bold"
-                  : "hover:bg-cyan-200/70 hover:text-cyan-900 text-cyan-700"}
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 font-bold"
+                  : "hover:bg-blue-100/90 hover:text-blue-900 text-blue-700"}
                 ${item.key === "IMPORTANT" ? "mt-6" : ""}
               `}
               style={{ outline: 'none' }}
@@ -570,7 +567,7 @@ function Sidebar({
             </button>
           ))}
         </nav>
-        <div className="text-xs text-cyan-900/40 text-center mt-auto select-none pt-2 tracking-widest">Powered by Todo App</div>
+        <div className="text-xs text-slate-700/40 text-center mt-auto select-none pt-2 tracking-widest">Powered by Todo App</div>
       </aside>
     </>
   );
@@ -727,7 +724,6 @@ function TodoAppMain() {
         displayName: profileDraft.displayName,
         avatarUrl: profileDraft.avatarUrl,
         bio: profileDraft.bio,
-        // Convert empty string to null before sending
         birthday: profileDraft.birthday === "" ? null : profileDraft.birthday 
       };
       console.log("Sending payload:", payload);
@@ -745,11 +741,9 @@ function TodoAppMain() {
       if (res.ok) {
         alert("Profile saved successfully!");
         setShowProfileModal(false);
-        // Update local user state - data is the full user object (without password)
         if (data && typeof data === 'object') {
           setUserProfile(data);
         } else {
-          // Fallback: Re-fetch profile to get updated data
           fetch(API_ME_URL, {
             headers: {
               Authorization: 'Bearer ' + token,
@@ -805,7 +799,6 @@ function TodoAppMain() {
     };
   }, [pct, totalCount]);
 
-  // Add Task
   const handleAddTask = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -964,7 +957,6 @@ function TodoAppMain() {
 
   const filteredTodos = getFilteredTodos(tasks, activeTab);
 
-  // For inline overdue date edit
   const [overdueInlineEditId, setOverdueInlineEditId] = useState(null);
   const [overdueInlineEditDate, setOverdueInlineEditDate] = useState('');
   const overdueInlineInputRef = useRef();
@@ -1012,32 +1004,22 @@ function TodoAppMain() {
   };
 
   // === DRAG AND DROP ===
-
-  /**
-   * Only allow drag-drop for 'INBOX'
-   * Reorder the `tasks` array and persist to backend.
-   */
   const handleOnDragEnd = async result => {
     if (!result.destination) return;
-    // Only act if not filtered, i.e., INBOX (this function only available for INBOX view)
     if (activeTab !== "INBOX") return;
 
     const fromIdx = result.source.index;
     const toIdx = result.destination.index;
     if (fromIdx === toIdx) return;
 
-    // 1. Reorder `tasks` locally
     const newTasks = Array.from(tasks);
     const [removedTask] = newTasks.splice(fromIdx, 1);
     newTasks.splice(toIdx, 0, removedTask);
 
     setTasks(newTasks);
-
-    // 2. Prepare new order data: array of { _id, position } (0-based index)
     const reorderPayload = newTasks.map((task, idx) => ({ _id: task._id, position: idx }));
 
     try {
-      // 3. Send PUT to /api/todos/reorder
       await fetch(`${API_URL}/reorder`, {
         method: "PUT",
         headers: {
@@ -1048,13 +1030,11 @@ function TodoAppMain() {
       });
     } catch (e) {
       // Optionally, roll back, or handle error
-      // For now, just leave as is
     }
   };
 
-  // Main
   return (
-    <div className="w-screen h-screen bg-gradient-to-br from-cyan-500 to-blue-700 transition duration-500 flex relative overflow-hidden">
+    <div className="w-screen h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 transition duration-500 flex relative overflow-hidden">
       {/* Confetti and Celebration Overlay */}
       {pct === 100 && totalCount > 0 && (
         <Confetti width={width} height={height} numberOfPieces={700} gravity={0.22} recycle={false} style={{ zIndex: 40, pointerEvents: "none" }} />
@@ -1105,7 +1085,7 @@ function TodoAppMain() {
       {/* Hamburger menu (mobile) */}
       <button
         onClick={() => setSidebarOpen(s => !s)}
-        className="absolute top-5 left-5 z-50 md:hidden rounded-full p-2 bg-white/60 shadow border border-white/30 transition hover:bg-cyan-400/70 focus:outline-none"
+        className="absolute top-5 left-5 z-50 md:hidden rounded-full p-2 bg-white/70 shadow border border-white/30 transition hover:bg-cyan-400/70 focus:outline-none"
         aria-label={sidebarOpen ? "Close Menu" : "Open Menu"}
         style={{}}
         tabIndex={0}
@@ -1132,8 +1112,8 @@ function TodoAppMain() {
       <main
         className="
           flex-1 w-full flex flex-col h-full overflow-hidden
-          bg-white/50 backdrop-blur-xl
-          shadow-2xl
+          bg-white/95 backdrop-blur-lg
+          shadow-2xl shadow-blue-900/50
           rounded-l-3xl md:rounded-l-none
           px-0 md:px-12 py-6
           transition-all duration-300
@@ -1148,10 +1128,10 @@ function TodoAppMain() {
         {/* Progress bar row */}
         <div className="mb-6">
           <div className="flex items-center justify-between mt-1 mb-2">
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-cyan-900 drop-shadow-sm select-none">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 drop-shadow-sm select-none">
               {getTabTitle(activeTab)}
             </h1>
-            <span className="text-xs font-semibold text-cyan-700 tracking-wide drop-shadow-sm">
+            <span className="text-xs font-semibold text-slate-700 tracking-wide drop-shadow-sm">
               {totalCount === 0
                 ? "0/0 Completed - 0%"
                 : `${completedCount}/${totalCount} Completed - ${pct}%`}
@@ -1176,14 +1156,14 @@ function TodoAppMain() {
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Add a task"
-            className="flex-1 px-4 py-2 rounded-xl border-none focus:border-transparent shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-300 bg-white/70 text-gray-900 placeholder-gray-400 font-semibold backdrop-blur transition"
+            className="flex-1 px-4 py-2 rounded-xl border-none focus:border-transparent shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-300 bg-white/70 text-slate-700 placeholder-gray-400 font-semibold backdrop-blur transition"
             onKeyDown={e => { if (e.key === 'Enter') handleAddTask(); }}
             autoFocus
           />
           <select
             value={inputPriority}
             onChange={e => setInputPriority(e.target.value)}
-            className="px-4 py-2 rounded-xl border-none focus:border-transparent bg-white/90 text-gray-700 font-semibold shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            className="px-4 py-2 rounded-xl border-none focus:border-transparent bg-white/90 text-slate-800 font-semibold shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-cyan-300"
             aria-label="Choose priority"
           >
             {PRIORITY_OPTIONS.map(opt =>
@@ -1212,7 +1192,7 @@ function TodoAppMain() {
                 className="absolute opacity-0 w-0 h-0"
               />
               {inputDueDate && (
-                <span className="ml-2 text-xs text-cyan-700 font-semibold">
+                <span className="ml-2 text-xs text-slate-700 font-semibold">
                   {formatDueDate(inputDueDate)}
                 </span>
               )}
@@ -1252,7 +1232,7 @@ function TodoAppMain() {
             <p className="text-cyan-500 text-center my-16 select-none text-lg animate-pulse">Loading...</p>
           ) : (
             filteredTodos.length === 0 ? (
-              <p className="text-cyan-600/80 text-center my-14 select-none text-lg">No tasks here yet.</p>
+              <p className="text-slate-700/80 text-center my-14 select-none text-lg">No tasks here yet.</p>
             ) : (
               activeTab === "INBOX" ? (
                 // Drag and Drop enabled only for INBOX
@@ -1260,7 +1240,7 @@ function TodoAppMain() {
                   <Droppable droppableId="tasksDroppable">
                     {(provided, snapshot) => (
                       <ul
-                        className="divide-y divide-cyan-100"
+                        className="divide-y divide-blue-100"
                         {...provided.droppableProps}
                         ref={provided.innerRef}
                       >
@@ -1290,14 +1270,13 @@ function TodoAppMain() {
                                   {...provided.dragHandleProps}
                                   className={`
                                     group flex items-center px-3 py-3.5 gap-4 rounded-2xl
-                                    hover:bg-cyan-50/75 transition 
+                                    hover:bg-blue-50/85 transition 
                                     ${task.completed ? 'opacity-60 line-through' : ''} 
                                     ${borderClass}
                                     ${snapshot.isDragging ? "z-10 bg-blue-100/80 shadow-lg scale-105" : ""}
                                   `}
                                   style={{ ...provided.draggableProps.style }}
                                 >
-                                  {/* Drag Handle Icon only when not editing/overdue inline edit */}
                                   {(!isEditing && !overdueInlineEditId) ? (
                                     <span className="cursor-grab pr-1 flex items-center select-none opacity-60 hover:opacity-100 transition">
                                       <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
@@ -1317,8 +1296,8 @@ function TodoAppMain() {
                                   <input type="checkbox" checked={!!task.completed} onChange={() => handleToggleCompleted(task._id)} className="accent-emerald-500 w-5 h-5 shrink-0 cursor-pointer" />
 
                                   {/* Priority Badge */}
-                                  <span className={`flex items-center min-w-[72px] px-2 py-1.5 rounded-lg font-bold text-xs text-center border border-white/20 shadow-sm select-none gap-1.5 ${getPriorityColor(task.priority)}`}>
-                                    <span className={`w-2.5 h-2.5 rounded-full inline-block ring-1 ring-white/90 ${task.priority === 'High' ? 'bg-red-400' : task.priority === 'Medium' ? 'bg-yellow-300' : 'bg-green-400'}`} />
+                                  <span className={`flex items-center min-w-[72px] px-2 py-1.5 rounded-lg font-bold text-xs text-center select-none gap-1.5 ${getPriorityColor(task.priority)}`}>
+                                    <span className={`w-2.5 h-2.5 rounded-full inline-block ring-1 ring-white/90 ${task.priority === 'High' ? 'bg-red-400' : task.priority === 'Medium' ? 'bg-amber-300' : 'bg-emerald-400'}`} />
                                     {task.priority || 'Medium'}
                                   </span>
                                   {/* Task Text or Edit Form */}
@@ -1329,7 +1308,7 @@ function TodoAppMain() {
                                           type="text"
                                           value={editValue}
                                           onChange={e => setEditValue(e.target.value)}
-                                          className="flex-1 text-base rounded-md px-2 py-1 mr-2 focus:ring-2 focus:ring-cyan-200 bg-white/70 outline-none text-gray-900 shadow"
+                                          className="flex-1 text-base rounded-md px-2 py-1 mr-2 focus:ring-2 focus:ring-cyan-200 bg-white/70 outline-none text-slate-700 shadow"
                                           onKeyDown={e => {
                                             if (e.key === 'Enter') handleSaveEdit(task._id);
                                             if (e.key === 'Escape') cancelEdit();
@@ -1337,7 +1316,7 @@ function TodoAppMain() {
                                           autoFocus
                                         />
                                         {/* Priority Select */}
-                                        <select value={editPriority} onChange={e => setEditPriority(e.target.value)} className="px-2 py-1 rounded-md border-none bg-white/80 text-gray-800 text-sm focus:ring-2 focus:ring-cyan-300 shadow-sm font-semibold">
+                                        <select value={editPriority} onChange={e => setEditPriority(e.target.value)} className="px-2 py-1 rounded-md border-none bg-white/80 text-slate-800 text-sm focus:ring-2 focus:ring-cyan-300 shadow-sm font-semibold">
                                           {PRIORITY_OPTIONS.map(opt => <option value={opt.value} key={opt.value}>{opt.label}</option>)}
                                         </select>
                                         {/* Date Input */}
@@ -1358,7 +1337,7 @@ function TodoAppMain() {
                                         <button onClick={cancelEdit} className="ml-2 bg-white/70 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded font-medium shadow transition">Cancel</button>
                                       </>
                                     ) : (
-                                      <span className={`flex-1 text-base font-medium min-w-0 break-words pl-0 select-text truncate ${task.completed ? 'text-gray-400' : 'text-cyan-900'}`}>
+                                      <span className={`flex-1 text-base font-medium min-w-0 break-words pl-0 select-text truncate ${task.completed ? 'text-gray-400' : 'text-slate-700'}`}>
                                         {task.text}
                                       </span>
                                     )}
@@ -1376,7 +1355,6 @@ function TodoAppMain() {
                                       )}
                                     </div>
                                   )}
-                                  {/* Action Buttons (Hidden in Edit Mode) */}
                                   {!isEditing && !overdueInlineEditId && (
                                     <div className="flex items-center gap-2 ml-2 opacity-70 group-hover:opacity-100 transition">
                                       <button onClick={() => startEditTask(task)} className="rounded-full p-1.5 hover:bg-cyan-100/60 transition" aria-label="Edit">
@@ -1398,8 +1376,7 @@ function TodoAppMain() {
                   </Droppable>
                 </DragDropContext>
               ) : (
-                // For filtered views - no drag & drop - show filteredTodos only
-                <ul className="divide-y divide-cyan-100">
+                <ul className="divide-y divide-blue-100">
                   {filteredTodos.map(task => {
                     const isOverdue = isDateOverdue(task.dueDate);
                     const isDueToday = isDateToday(task.dueDate);
@@ -1417,16 +1394,15 @@ function TodoAppMain() {
                         key={task._id}
                         className={`
                           group flex items-center px-3 py-3.5 gap-4 rounded-2xl 
-                          hover:bg-cyan-50/75 transition 
+                          hover:bg-blue-50/85 transition 
                           ${task.completed ? 'opacity-60 line-through' : ''} 
                           ${borderClass}
                         `}
                       >
-                        {/* Drag Handle - Hidden for filtered views */}
                         <span className="pr-1" />
                         <input type="checkbox" checked={!!task.completed} onChange={() => handleToggleCompleted(task._id)} className="accent-emerald-500 w-5 h-5 shrink-0 cursor-pointer" />
-                        <span className={`flex items-center min-w-[72px] px-2 py-1.5 rounded-lg font-bold text-xs text-center border border-white/20 shadow-sm select-none gap-1.5 ${getPriorityColor(task.priority)}`}>
-                          <span className={`w-2.5 h-2.5 rounded-full inline-block ring-1 ring-white/90 ${task.priority === 'High' ? 'bg-red-400' : task.priority === 'Medium' ? 'bg-yellow-300' : 'bg-green-400'}`} />
+                        <span className={`flex items-center min-w-[72px] px-2 py-1.5 rounded-lg font-bold text-xs text-center select-none gap-1.5 ${getPriorityColor(task.priority)}`}>
+                          <span className={`w-2.5 h-2.5 rounded-full inline-block ring-1 ring-white/90 ${task.priority === 'High' ? 'bg-red-400' : task.priority === 'Medium' ? 'bg-amber-300' : 'bg-emerald-400'}`} />
                           {task.priority || 'Medium'}
                         </span>
                         <div className="flex-1 flex items-center min-w-0">
@@ -1436,14 +1412,14 @@ function TodoAppMain() {
                                 type="text"
                                 value={editValue}
                                 onChange={e => setEditValue(e.target.value)}
-                                className="flex-1 text-base rounded-md px-2 py-1 mr-2 focus:ring-2 focus:ring-cyan-200 bg-white/70 outline-none text-gray-900 shadow"
+                                className="flex-1 text-base rounded-md px-2 py-1 mr-2 focus:ring-2 focus:ring-cyan-200 bg-white/70 outline-none text-slate-700 shadow"
                                 onKeyDown={e => {
                                   if (e.key === 'Enter') handleSaveEdit(task._id);
                                   if (e.key === 'Escape') cancelEdit();
                                 }}
                                 autoFocus
                               />
-                              <select value={editPriority} onChange={e => setEditPriority(e.target.value)} className="px-2 py-1 rounded-md border-none bg-white/80 text-gray-800 text-sm focus:ring-2 focus:ring-cyan-300 shadow-sm font-semibold">
+                              <select value={editPriority} onChange={e => setEditPriority(e.target.value)} className="px-2 py-1 rounded-md border-none bg-white/80 text-slate-800 text-sm focus:ring-2 focus:ring-cyan-300 shadow-sm font-semibold">
                                 {PRIORITY_OPTIONS.map(opt => <option value={opt.value} key={opt.value}>{opt.label}</option>)}
                               </select>
                               <div className="relative flex items-center ml-2">
@@ -1462,12 +1438,11 @@ function TodoAppMain() {
                               <button onClick={cancelEdit} className="ml-2 bg-white/70 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded font-medium shadow transition">Cancel</button>
                             </>
                           ) : (
-                            <span className={`flex-1 text-base font-medium min-w-0 break-words pl-0 select-text truncate ${task.completed ? 'text-gray-400' : 'text-cyan-900'}`}>
+                            <span className={`flex-1 text-base font-medium min-w-0 break-words pl-0 select-text truncate ${task.completed ? 'text-gray-400' : 'text-slate-700'}`}>
                               {task.text}
                             </span>
                           )}
                         </div>
-                        {/* Due Date Badge (Hidden in Edit Mode) */}
                         {!isEditing && (task.dueDate || isDueToday || isOverdue) && (
                           <div className="flex flex-col items-start min-w-[73px] mx-2">
                             {isDueToday && <span className="text-xs text-orange-500 font-bold select-none">Due today</span>}
@@ -1480,7 +1455,6 @@ function TodoAppMain() {
                             )}
                           </div>
                         )}
-                        {/* Action Buttons (Hidden in Edit Mode) */}
                         {!isEditing && !overdueInlineEditId && (
                           <div className="flex items-center gap-2 ml-2 opacity-70 group-hover:opacity-100 transition">
                             <button onClick={() => startEditTask(task)} className="rounded-full p-1.5 hover:bg-cyan-100/60 transition" aria-label="Edit">
