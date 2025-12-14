@@ -13,7 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'mysecretkey';
 
 // MongoDB connection
 const mongoURI = 'mongodb+srv://handsomelee:handsomelee@cluster0.ky8lcx0.mongodb.net/?appName=Cluster0';
-mongoose.connect(process.env.MONGO_URI || mongoURI)
+mongoose.connect(process.env.MONGO_URI || mongoURI);
 
 // User Schema and Model
 const userSchema = new mongoose.Schema({
@@ -22,16 +22,18 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// Todo Schema and Model (link to userId)
+// Todo Schema and Model (link to userId) - WITH explicit dueDate (nullable)
 const todoSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   text: { type: String, required: true },
   completed: { type: Boolean, required: true, default: false },
-  priority: { 
-    type: String, 
-    enum: ['High', 'Medium', 'Low'], 
-    default: 'Medium' 
+  priority: {
+    type: String,
+    enum: ['High', 'Medium', 'Low'],
+    default: 'Medium'
   },
+  createdAt: { type: Date, default: Date.now },
+  dueDate: { type: Date, default: null } // Explicit for dueDate
 });
 const Todo = mongoose.model('Todo', todoSchema);
 
@@ -39,7 +41,7 @@ const Todo = mongoose.model('Todo', todoSchema);
 app.use(cors());
 app.use(express.json());
 
-// Middleware to authenticate JWT
+// JWT Authentication Middleware
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -49,14 +51,14 @@ function authenticateToken(req, res, next) {
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid/Expired token' });
-    req.user = user; // user: { userId, username }
+    req.user = user;
     next();
   });
 }
 
-// Authentication Routes
+// ==== Authentication Routes ====
 
-// Register
+// Register Route
 app.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -77,7 +79,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// Login
+// Login Route
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -101,47 +103,68 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Protected TODO Routes
+// ==== Protected TODO Routes ====
 
-// GET: Retrieve all todos for current user
+// GET: Retrieve all todos for current user, sorted by priority and createdAt
 app.get('/api/todos', authenticateToken, async (req, res) => {
   try {
-    const todos = await Todo.find({ userId: req.user.userId });
+    const priorityOrder = { High: 0, Medium: 1, Low: 2 };
+    const todos = await Todo.find({ userId: req.user.userId }).lean();
+
+    todos.sort((a, b) => {
+      const pA = priorityOrder[a.priority] ?? 99;
+      const pB = priorityOrder[b.priority] ?? 99;
+      if (pA !== pB) return pA - pB;
+      return (b.createdAt || 0) - (a.createdAt || 0);
+    });
+
     res.json(todos);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch todos' });
   }
 });
 
-// POST: Add a new task for current user (now supports priority)
+// POST: Add new todo, making sure dueDate is correctly handled/persisted
 app.post('/api/todos', authenticateToken, async (req, res) => {
   try {
-    const { text, completed, priority } = req.body;
+    console.log("📨 Server nhận được:", req.body);
+    // Extract dueDate along with text/priority
+    const { text, priority, dueDate } = req.body;
     if (!text) return res.status(400).json({ error: 'Text required' });
 
     let todoPriority = priority;
     if (!['High', 'Medium', 'Low'].includes(todoPriority)) {
-      todoPriority = 'Medium'; // fallback to default
+      todoPriority = 'Medium';
     }
 
-    const todo = new Todo({
-      userId: req.user.userId,
+    // Prepare dueDate for Mongo
+    let realDueDate = null;
+    if (typeof dueDate !== "undefined" && dueDate !== null && dueDate !== "") {
+      const asDate = new Date(dueDate);
+      realDueDate = isNaN(asDate.getTime()) ? null : asDate;
+    }
+
+    // Save to DB with accurate dueDate field
+    const newTodo = new Todo({
       text,
-      completed: completed ?? false,
-      priority: todoPriority
+      priority: todoPriority,
+      // Do not allow initial "completed" from user for security
+      completed: false,
+      userId: req.user.userId,
+      dueDate: realDueDate
     });
-    const savedTodo = await todo.save();
-    res.json(savedTodo);
+
+    const saved = await newTodo.save();
+    res.json(saved);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create todo' });
   }
 });
 
-// DELETE: Delete a todo for current user by id
+// DELETE: Remove a todo by id for the current user
 app.delete('/api/todos/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    // Find todo and ensure ownership
     const todo = await Todo.findOne({ _id: id, userId: req.user.userId });
     if (!todo) {
       return res.status(404).json({ error: 'Todo not found or not yours' });
@@ -154,19 +177,19 @@ app.delete('/api/todos/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// PUT: Edit a todo (update text, priority, or completed) for current user's todo
+// PUT: Update todo (allow updating dueDate)
 app.put('/api/todos/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { text, completed, priority } = req.body;
+    const { text, completed, priority, dueDate } = req.body;
+
     // Find todo and ensure ownership
     const todo = await Todo.findOne({ _id: id, userId: req.user.userId });
     if (!todo) {
       return res.status(404).json({ error: 'Todo not found or not yours' });
     }
 
-    // Only update fields provided in req.body
-
+    // Update provided fields
     if (typeof text === 'string') {
       todo.text = text;
     }
@@ -177,11 +200,22 @@ app.put('/api/todos/:id', authenticateToken, async (req, res) => {
       todo.priority = priority;
     }
 
-    // If no fields are provided, fallback to toggling completed (for backward compat.)
+    // Due date logic: allow setting, clearing, or updating
+    if (Object.prototype.hasOwnProperty.call(req.body, 'dueDate')) {
+      if (dueDate === null || dueDate === "") {
+        todo.dueDate = null;
+      } else {
+        const dateObj = new Date(dueDate);
+        todo.dueDate = isNaN(dateObj.getTime()) ? null : dateObj;
+      }
+    }
+
+    // For API backward compat: toggle 'completed' if no fields
     if (
       text === undefined &&
       completed === undefined &&
-      priority === undefined
+      priority === undefined &&
+      dueDate === undefined
     ) {
       todo.completed = !todo.completed;
     }
